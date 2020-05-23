@@ -2,6 +2,15 @@ import pandas as pd
 import tensorflow as tf
 
 column_names = ['0/timestamp', 't', 'no', 'measurement x', 'measurement y', 'reference x', 'reference y']
+column_names_test_data = ['0/timestamp', 't', 'no', 'measurement x', 'measurement y', 'reference x', 'reference y',
+                          'błąd pomiaru', 'błąd', 'liczba błędnych próbek', '% błędnych próbek']
+test_data = pd.read_excel('../resources/pozyxAPI_only_localization_dane_testowe_i_dystrybuanta.xlsx')
+test_mes_x = test_data.pop('measurement x')
+test_mes_y = test_data.pop('measurement y')
+test_tar_x = test_data.pop('reference x')
+test_tar_y = test_data.pop('reference y')
+test_mes = pd.concat([test_mes_x,test_mes_y], axis=1)
+test_tar = pd.concat([test_tar_x,test_tar_y], axis=1)
 df1 = pd.read_excel('../resources/pozyxAPI_only_localization_measurement1.xlsx', names=column_names)
 df2 = pd.read_excel('../resources/pozyxAPI_only_localization_measurement2.xlsx', names=column_names)
 df3 = pd.read_excel('../resources/pozyxAPI_only_localization_measurement3.xlsx', names=column_names)
@@ -24,16 +33,23 @@ tar_y = df.pop('reference y')
 target_data = pd.concat([tar_x, tar_y], axis=1)
 training_data = (training_data.astype('float32') + 2000) / 10000
 target_data = (target_data.astype('float32') + 2000) / 10000
+test_mes = (test_mes.astype('float32') + 2000) / 10000
+test_tar = (test_tar.astype('float32') + 2000) / 10000
 
 
 network = tf.keras.models.Sequential()
+network.add(tf.keras.layers.Dense(32, activation='relu'))
+network.add(tf.keras.layers.Dense(16, activation='relu'))
+network.add(tf.keras.layers.Dense(8, activation='relu'))
 network.add(tf.keras.layers.Dense(4, activation='relu'))
 network.add(tf.keras.layers.Dense(2, activation='linear'))
 network.compile(optimizer=tf.keras.optimizers.RMSprop(0.001),
                 loss=tf.keras.losses.MeanSquaredError(),
                 metrics=['accuracy'])
-network.fit(training_data, target_data, epochs=15)
-
-xd = training_data[:10]
+network.fit(training_data, target_data, epochs=150)
+print(test_mes*10000-2000)
+print(test_tar*10000-2000)
+network.evaluate(test_mes, test_tar)
+xd = test_mes[:10]
 res = network.predict(xd)
 print(res*10000-2000)
