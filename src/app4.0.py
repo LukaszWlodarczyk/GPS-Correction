@@ -1,5 +1,4 @@
 import pandas as pd
-import tensorflow as tf
 
 column_names = ['0/timestamp', 't', 'no', 'measurement x', 'measurement y', 'reference x', 'reference y']
 column_names_test_data = ['0/timestamp', 't', 'no', 'measurement x', 'measurement y', 'reference x', 'reference y',
@@ -33,39 +32,5 @@ tar_y = df.pop('reference y')
 target_data = pd.concat([tar_x, tar_y], axis=1)
 training_data = (training_data.astype('float32') + 2000) / 10000
 target_data = (target_data.astype('float32') + 2000) / 10000
-
-# To validation
-# training_data = training_data[(11*1540):]
-# target_data = target_data[(11*1540):]
-# val_data_mes = training_data[:1540]
-# val_data_tar = target_data[:1540]
-
 test_mes = (test_mes.astype('float32') + 2000) / 10000
 test_tar = (test_tar.astype('float32') + 2000) / 10000
-
-
-network = tf.keras.models.Sequential()
-network.add(tf.keras.layers.Dense(128, activation='relu'))
-network.add(tf.keras.layers.Dense(64, activation='relu'))
-network.add(tf.keras.layers.Dense(32, activation='relu'))
-network.add(tf.keras.layers.Dense(16, activation='relu'))
-network.add(tf.keras.layers.Dense(8, activation='relu'))
-network.add(tf.keras.layers.Dense(2, activation='relu'))
-network.compile(optimizer=tf.keras.optimizers.Adam(),
-                loss=tf.keras.losses.MeanSquaredError(),
-                metrics=['accuracy'])
-# 12 file is using for validation
-#network.fit(training_data, target_data, epochs=500, batch_size=512, validation_data=(val_data_mes, val_data_tar))
-
-# without validation
-network.fit(training_data, target_data, epochs=500, batch_size=256)
-
-network.evaluate(test_mes, test_tar, batch_size=512)
-xd = test_mes[:10]
-xd2 = test_tar[:10]
-res = network.predict(xd)
-print(xd*10000-2000)
-print(xd2*10000-2000)
-print(res*10000-2000)
-
-
