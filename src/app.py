@@ -48,7 +48,6 @@ test_tar = (test_tar.astype('float32') + 2000) / 10000
 
 #Create network
 network = tf.keras.models.Sequential()
-network.add(tf.keras.Input(shape=()))
 network.add(tf.keras.layers.Dense(128, activation='relu'))
 network.add(tf.keras.layers.Dense(64, activation='relu'))
 network.add(tf.keras.layers.Dense(32, activation='relu'))
@@ -62,11 +61,13 @@ network.compile(optimizer=tf.keras.optimizers.Adam(),
                 metrics=['accuracy'])
 
 # Fit (train) network, calculate it's accuracy using val_data_mes and val_data_tar as validation data set
-network.fit(np.asarray(training_data_1), np.asarray(target_data_1), epochs=15, batch_size=512,
+network.fit(np.asarray(training_data_1), np.asarray(target_data_1), epochs=150, batch_size=512,
             validation_data=(val_data_mes, val_data_tar))
 
 # Evaluate network to get loss value % metrics values
 network.evaluate(test_mes, test_tar, batch_size=512)
+
+#Get each layer neuron weights and save to file
 weights = network.layers[0].get_weights()[0]
 print(weights)
 
