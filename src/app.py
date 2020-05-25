@@ -1,6 +1,5 @@
 import glob
 import os
-
 import pandas as pd
 import tensorflow as tf
 import numpy as np
@@ -14,7 +13,7 @@ test_tar_y = test_data.pop('reference y')
 test_mes = pd.concat([test_mes_x, test_mes_y], axis=1)
 test_tar = pd.concat([test_tar_x, test_tar_y], axis=1)
 
-# Read training & targed data from files
+# Read training & target data from files
 path = '../resources/'
 column_names = ['0/timestamp', 't', 'no', 'measurement x', 'measurement y', 'reference x', 'reference y']
 
@@ -67,13 +66,14 @@ network.fit(np.asarray(training_data_1), np.asarray(target_data_1), epochs=150, 
 # Evaluate network to get loss value % metrics values
 network.evaluate(test_mes, test_tar, batch_size=512)
 
-#Get each layer neuron weights and save to file
-weights = network.layers[0].get_weights()[0]
-print(weights)
+# Get network weighs and save to csv
+network_weights= pd.DataFrame(network.get_weights())
+network_weights.to_csv('wagi.csv', sep=' ', mode='a')
 
 # Get output for desired measurements using trained network
 res = network.predict(test_mes)
 res = res * 10000 - 2000
 res1 = pd.DataFrame(res)
-#res1.to_excel('wyniki1.xlsx', engine='xlsxwriter')
-print(res * 10000 - 2000)
+
+# Save result to excel for distribuant error plotting
+res1.to_excel('wyniki.xlsx', engine='xlsxwriter')
